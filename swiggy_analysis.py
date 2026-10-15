@@ -1,0 +1,102 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+df=pd.read_csv("swiggy_cleaned.csv")
+print("\n First 5 rows and columns : ")
+print(df.head())
+print("\n Rows & Columns:")
+print(df.shape)
+print("\n Data Info:")
+print(df.info())
+print("\n Statistics data:")
+print(df.describe())
+print("\n Missing values:")
+print(df.isnull().sum())
+
+# Fix rating - convert to number
+df["rating"]=pd.to_numeric(df["rating"],errors="coerce")
+# Replace "not_available" with NaN in offer columns
+df["offer_above"]=df["offer_above"].replace("not_available",np.nan)
+df["offer_percentage"]=df["offer_percentage"].replace("not_available",np.nan)
+df["time_minutes"]=pd.to_numeric(df["time_minutes"],errors="coerce")
+print("\n After cleaning: ")
+print(df.dtypes)
+print("\n Missing values")
+print(df.isnull().sum())
+#AVERAGE RESTAURENTS 
+print("AVERAGE RATINGS : ",round(df["rating"].mean(),2))
+#AVERAGE DELIVERY TIME:
+print("AVERAGE DELIVERY TIME: ",round(df["time_minutes"].mean(),2),"MINUTES")
+#AVERAGE TOP 5 LOCATION WITH MOST RESATURENTS
+print("\n TOP 5 LOCATIONS: ")
+print(df["location"].value_counts().head())
+#HIGHEST RATED RESTAURENTS
+print("\n TOP 5 RATED RESTAURENTS: ")
+print(df[["hotel_name","rating"]].sort_values("rating",ascending=False).head())
+#CHAT-1 TOP 10 LOCATIONS BAR CHART
+top_locations=df["location"].value_counts().head(10)
+plt.figure(figsize=(12,6))
+sns.barplot(y=top_locations.values, x=top_locations.index)
+plt.xlabel("Number of Restuarents")
+plt.ylabel("location")
+plt.title("TOP 10 LOCATIONS WITH MOST RESTAURENTS")
+plt.tight_layout()
+plt.show()
+#CHART-2 TOP FOOD TYPES
+top_foods=df["food_type"].value_counts().head(10)
+plt.figure(figsize=(12,6))
+sns.barplot(x=top_foods.index,y=top_foods.values)
+plt.title("TOP 10 FOODS TYPES")
+plt.xlabel("Food Types")
+plt.ylabel("Number of Restaurents")
+plt.xticks(rotation=45,ha="right")
+plt.tight_layout()
+plt.show()
+#Chart 3 Ratiing distrubution
+plt.figure(figsize=(10,6))
+sns.histplot(df["rating"].dropna(),bins=20,kde=True,color="green")
+plt.title("DISTRUBUTION OF RESTAURENTS RATINGS")
+plt.xlabel("Rating")
+plt.ylabel("Number of Restaurents")
+plt.tight_layout()
+plt.show()
+#Chart4 scatter plot (Delivery time vs rating )
+plt.figure(figsize=(10,6))
+sns.scatterplot(x=df["time_minutes"],y=df["rating"],alpha=0.5,color="red")
+plt.title("Delivery Time vs Rating ")
+plt.xlabel("Deliver time(minutes)")
+plt.ylabel("Rating")
+plt.tight_layout()
+plt.show()
+# Chart 5 - Box Plot Ratings by Location
+top_10_locations = df["location"].value_counts().head(10).index.tolist()
+df_top = df[df["location"].isin(top_10_locations)].copy()
+df_top["rating"] = pd.to_numeric(df_top["rating"], errors="coerce")
+df_top = df_top.dropna(subset=["rating", "location"])
+
+plt.figure(figsize=(14, 7))
+sns.boxplot(x="location", y="rating", data=df_top)
+plt.title("Rating Distribution by Top 10 Locations")
+plt.xlabel("Location")
+plt.ylabel("Rating")
+plt.xticks(rotation=45, ha="right")
+plt.tight_layout()
+plt.show()
+# PART 5 - INSIGHTS & CONCLUSIONS
+print("=" * 50)
+print("SWIGGY FOOD DELIVERY - KEY INSIGHTS")
+print("=" * 50)
+
+print("\n1. Total restaurants analyzed:", len(df))
+print("2. Average rating:", round(df["rating"].mean(), 2))
+print("3. Average delivery time:", round(df["time_minutes"].mean(), 2), "minutes")
+print("4. Most popular location:", df["location"].value_counts().index[0])
+print("5. Most popular food type:", df["food_type"].value_counts().index[0])
+print("6. Highest rated restaurant:", df.loc[df["rating"].idxmax(), "hotel_name"])
+print("7. Fastest delivery time:", round(df["time_minutes"].min(), 0), "minutes")
+print("8. Slowest delivery time:", round(df["time_minutes"].max(), 0), "minutes")
+
+print("\n" + "=" * 50)
+print("PROJECT COMPLETE!")
+print("=" * 50)
